@@ -30,6 +30,11 @@
                             margin-right: 10px;
                         }
                     }
+                    .van-cell__value {
+                        .van-icon {
+                            font-size: 40px;
+                        }
+                    }
                 }
                 .van-search__action {
                     font-size: 32px;
@@ -56,10 +61,10 @@
                     v-model="value"
                     placeholder="请输入搜索关键词"
                     show-action
-                    @search="onSearch"
+                    @search="onSearch(value)"
                     style="background: #fff"
             >
-                <div slot="action" @click="onSearch">搜索</div>
+                <div slot="action" @click="onSearch(value)">搜索</div>
             </van-search>
         </header>
         <div class="result">
@@ -104,13 +109,13 @@
             getCommodityList () {
                 this.$api(this.$SERVER.GET_COMMODITYLIST, {
                     params: this.getApiData
-                })
-                    .then(data =>
-                        this.commodityList = data.data.list
-                    )
+                }).then(data => this.commodityList = data.data.list)
             },
-            onSearch () {
-
+            onSearch (keyword) {
+                this.$router.push({
+                    path: '/result',
+                    query: {keyword}
+                })
             },
             // 跳转至搜索结果页面
             toResult (keyword) {
@@ -118,22 +123,32 @@
                     path: '/result',
                     query: {keyword}
                 })
+            },
+            // 清楚搜索关键词
+            clearKeyword () {
+                this.value = ''
             }
         },
         watch: {
           // 检测搜索关键词的变化
           value () {
-              this.dataList = []
-              for (let i=0; i<this.commodityList.length; i++) {
-                  let reg = new RegExp('.*' + this.value + '.*')
-                  if (reg.test(this.commodityList[i].c_title) && this.value!=='') {
-                      this.dataList.push(this.commodityList[i].c_title)
+              this.$api(this.$SERVER.GET_COMMODITYLIST, {
+                  params: this.getApiData
+              }).then(data => {
+                  this.commodityList = data.data.list
+                  this.dataList = []
+                  for (let i=0; i<this.commodityList.length; i++) {
+                      let reg = new RegExp('.*' + this.value + '.*')
+                      if (reg.test(this.commodityList[i].c_title) && this.value!=='') {
+                          this.dataList.push(this.commodityList[i].c_title)
+                      }
                   }
-              }
+              })
           }
         },
         created() {
             this.getCommodityList()
+            this.value = this.$route.query.keyword
         },
         mounted() {
 

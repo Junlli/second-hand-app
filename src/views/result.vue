@@ -89,6 +89,7 @@
                     v-model="value"
                     placeholder="请输入搜索关键词"
                     style="background: #fff"
+                    @click="toSearch(value)"
             >
             </van-search>
         </header>
@@ -117,6 +118,15 @@
         name: "result",
         data() {
             return {
+                getApiData: {
+                    c_type: '',
+                    c_type2: '',
+                    pageSize: 20,
+                    pageIndex: 1,
+                    c_state: 1,
+                    u_school: '',
+                    c_title: ''
+                },
                 commodityList: []
             }
         },
@@ -128,13 +138,28 @@
             ...mapMutations([]),
             // 获取商品列表
             getCommodityList () {
+                this.getApiData.c_title = this.$route.query.keyword
                 this.$api(this.$SERVER.GET_COMMODITYLIST, {
-                    params: {c_title: this.$route.query.keyword}
+                    params: this.getApiData
                 }).then(data => this.commodityList = data.data.list)
             },
             // 跳转至首页
             toHome () {
                 this.$router.push('/')
+            },
+            // 跳转至搜索页
+            toSearch (keyword) {
+                this.$router.push({
+                    path: '/search',
+                    query: {keyword}
+                })
+            },
+            // 跳转至商品详情
+            toDetail (id) {
+                this.$router.push({
+                    name: 'detail',
+                    params: {id}
+                })
             }
         },
         created() {
